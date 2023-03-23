@@ -1,20 +1,27 @@
 "use client";
 import { PaperAirplaneIcon } from "@heroicons/react/24/solid";
 import { FormEvent, useState } from "react";
-import { useSession } from "next-auth/react";
 import { Message } from "../typings";
-import { addDoc, collection, serverTimestamp } from "firebase/firestore";
+import {
+  addDoc,
+  collection,
+  DocumentData,
+  QuerySnapshot,
+  serverTimestamp,
+} from "firebase/firestore";
 import { db } from "../firebase";
 import toast from "react-hot-toast";
 import ModelSelection from "./ModelSelection";
 import useSWR from "swr";
+import { Session } from "next-auth";
 
 type Props = {
   chatId: string;
+  session: Session | null;
+  messages: QuerySnapshot<DocumentData> | undefined;
 };
 
-function ChatInput({ chatId }: Props) {
-  const { data: session, status } = useSession();
+function ChatInput({ chatId, session, messages }: Props) {
   const [prompt, setPrompt] = useState("");
 
   // retrieve the model from SWR cache
@@ -34,14 +41,19 @@ function ChatInput({ chatId }: Props) {
       user: {
         _id: session?.user?.email!,
         name: session?.user?.name!,
-        avatar: session?.user?.image! || `https://ui-avatars.com/api/?name=${session?.user?.name}`,
+        avatar: session?.user?.image || `https://ui-avatars.com/api/?name=${session?.user?.name}`,
       },
     };
 
+    // Save the user's message to the DB
     await addDoc(
       collection(db, "users", session?.user?.email!, "chats", chatId, "messages"),
       message
     );
+
+    const promptHistory = (messages?.docs || [])
+      .map((message) => message.data().text)
+      .reduce((text, messages) => (text += messages), "");
 
     const notification = toast.loading("ChatGPT is thinking...");
 
@@ -51,7 +63,7 @@ function ChatInput({ chatId }: Props) {
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        prompt: input,
+        prompt: promptHistory + input,
         chatId,
         model,
         session,

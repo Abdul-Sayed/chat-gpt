@@ -9,6 +9,7 @@ import NewChat from "./NewChat";
 import { db } from "../firebase";
 import ChatRow from "./ChatRow";
 import ModelSelection from "./ModelSelection";
+import { Img } from "react-image";
 
 function SideBar() {
   const { data: session, status } = useSession();
@@ -17,6 +18,7 @@ function SideBar() {
     session &&
       query(collection(db, "users", session?.user?.email!, "chats"), orderBy("createdAt", "asc"))
   );
+
   return (
     <section className="flex flex-col h-screen p-2">
       <div className="flex-1">
@@ -36,9 +38,9 @@ function SideBar() {
         </div>
       </div>
       {session && (
-        <img
+        <Img
           onClick={() => signOut()}
-          src={session?.user?.image!}
+          src={[session?.user?.image!, `https://ui-avatars.com/api/?name=${session?.user?.name!}`]}
           alt="Profile Pic"
           className="h-12 w-12 rounded-full cursor-pointer mx-auto mb-2 hover:opacity-50"
         />

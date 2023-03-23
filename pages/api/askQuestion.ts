@@ -18,7 +18,6 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse<
 
   //Populate the message from querying ChatGPT api
   const response = await query(prompt, model);
-  console.log("response", response);
 
   const message: Message = {
     text: response || "ChatGPT was unable to find an answer for that",
@@ -30,7 +29,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse<
     },
   };
 
-  // Save the message to Firebase
+  // Save ChatGPT's message to Firebase
   await adminDb
     .collection("users")
     .doc(session?.user?.email)

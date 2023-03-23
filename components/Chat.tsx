@@ -1,27 +1,14 @@
 "use client";
 
-import { getFirestore, collection, orderBy, query } from "firebase/firestore";
-import { useCollection } from "react-firebase-hooks/firestore";
-import { db } from "../firebase";
-import { useSession } from "next-auth/react";
-import Message from "./Message";
+import { QuerySnapshot, DocumentData } from "firebase/firestore";
 import { ArrowDownCircleIcon } from "@heroicons/react/24/outline";
+import Message from "./Message";
 
 type Props = {
-  chatId: string;
+  messages: QuerySnapshot<DocumentData> | undefined;
 };
 
-function Chat({ chatId }: Props) {
-  const { data: session } = useSession();
-
-  const [messages, loading, error] = useCollection(
-    session &&
-      query(
-        collection(db, "users", session.user?.email!, "chats", chatId, "messages"),
-        orderBy("createdAt", "asc")
-      )
-  );
-
+function Chat({ messages }: Props) {
   return (
     <div className="flex-1 overflow-x-hidden overflow-y-scroll scrollbar-hide">
       {messages?.empty ? (
