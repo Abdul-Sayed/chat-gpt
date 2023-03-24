@@ -1,19 +1,19 @@
 "use client";
 
+import { useSession, signOut } from "next-auth/react";
 import { getFirestore, collection, query, orderBy } from "firebase/firestore";
 import { useCollection } from "react-firebase-hooks/firestore";
-
-import { useSession } from "next-auth/react";
-import { signOut } from "next-auth/react";
-import NewChat from "./NewChat";
-import { db } from "../firebase";
-import ChatRow from "./ChatRow";
-import ModelSelection from "./ModelSelection";
 import { Img } from "react-image";
 
+import { db } from "../firebase";
+import NewChat from "./NewChat";
+import ChatRow from "./ChatRow";
+import ModelSelection from "./ModelSelection";
+
 function SideBar() {
+  // obtain the session
   const { data: session, status } = useSession();
-  // Get a list of the chat messages
+  // Get a list of the chats, to populate a ChatRow for each one
   const [chats, loading, error] = useCollection(
     session &&
       query(collection(db, "users", session?.user?.email!, "chats"), orderBy("createdAt", "asc"))

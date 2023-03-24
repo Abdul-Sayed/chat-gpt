@@ -1,27 +1,103 @@
-# Next.js + Tailwind CSS Example
+# ChatGPT
 
-This example shows how to use [Tailwind CSS](https://tailwindcss.com/) [(v3.2)](https://tailwindcss.com/blog/tailwindcss-v3-2) with Next.js. It follows the steps outlined in the official [Tailwind docs](https://tailwindcss.com/docs/guides/nextjs).
+## Web app using React, NextJS 13 with Server and Client components, Typescript, OpenAI ChatGPT API, Firebase, Firestore, Firebase Admin, NextAuth with Firebase, useSWR, React-Select, React Hot Toast, TailwindCSS
 
-## Deploy your own
+Live link: `https://chat-gpt-abdul-sayed.vercel.app`
+API: `https://api.openai.com/v1/chat/completions`
 
-Deploy the example using [Vercel](https://vercel.com?utm_source=github&utm_medium=readme&utm_campaign=next-example) or preview live with [StackBlitz](https://stackblitz.com/github/vercel/next.js/tree/canary/examples/with-tailwindcss)
+### File and Folder structure
 
-[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/git/external?repository-url=https://github.com/vercel/next.js/tree/canary/examples/with-tailwindcss&project-name=with-tailwindcss&repository-name=with-tailwindcss)
+The app folder contains the application wide layout, as well as the navigation routes
 
-## How to use
+```
+Root ('/')
 
-Execute [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app) with [npm](https://docs.npmjs.com/cli/init), [Yarn](https://yarnpkg.com/lang/en/docs/cli/create/), or [pnpm](https://pnpm.io) to bootstrap the example:
+Layout
+|
+├──Login (if not logged in)
+|
+├───SideBar
+|   └──NewChat <==> routes to `/chat/chatId`
+|   └──ModelSelection <==> calls `api/getModels`
+|   └──ChatRow <==> routes to `/chat/chatId`
+|
+└───Page
 
-```bash
-npx create-next-app --example with-tailwindcss with-tailwindcss-app
+Sub Route ('/chat')
+
+Page
+|
+├───Chat
+|   └──Message
+|
+└──ChatInput <==> calls '/api/askQuestion'
+
 ```
 
-```bash
-yarn create next-app --example with-tailwindcss with-tailwindcss-app
-```
+### API Routes
 
-```bash
-pnpm create next-app --example with-tailwindcss with-tailwindcss-app
-```
+pages/api/getModels -> Gets all the Chat Engines or models from the openai api.  
+pages/api/askQuestions -> Call the ChatGPT api to get a response to the user's prompt. And save the response message to the db.
 
-Deploy it to the cloud with [Vercel](https://vercel.com/new?utm_source=github&utm_medium=readme&utm_campaign=next-example) ([Documentation](https://nextjs.org/docs/deployment)).
+#### State
+
+> SWR was used to manage serverside state
+
+    // Set the model in one component with a setModel function
+    const { data: model, mutate: setModel } = useSWR("model", {
+      fallbackData: "text-davinci-003",
+    });
+
+    // retrieve the model from SWR cache
+    const { data: model } = useSWR("model", {
+      fallbackData: "text-davinci-003",
+    });
+
+### FireStore Data Structure
+
+> database -> 'users' collection -> Email documents -> 'chats' collection -> ChatId documents -> 'messages' collection -> messageId documents -> message
+
+To read data client side:
+
+    // Retrieve all messages from the db
+    const [messages, loading, error] = useCollection(
+      session &&
+        query(
+          collection(db, "users", session.user?.email!, "chats", id, "messages"),
+          orderBy("createdAt", "asc")
+        )
+    );
+
+To write data client side:
+
+    // Save the user's message to the messages collection
+    await addDoc(
+      collection(db, "users", session?.user?.email!, "chats", chatId, "messages"),
+      message
+    );
+
+To write data serverside:
+
+    // Add a message to the messages collection
+    await adminDb
+      .collection("users")
+      .doc(session?.user?.email)
+      .collection("chats")
+      .doc(chatId)
+      .collection("messages")
+      .add(message);
+
+#### Next Auth config
+
+In 'pages/api/auth/[...nextauth].js', Google was configured as the OAuth Provider.  
+In SessionProvider.tsx, a provider wrapper with the client side session is returned, which is used to wrap everything in the primary Layout.tsx.
+
+Session is obtained in a serverside component with:
+
+    import { getServerSession } from "next-auth";
+    const session = await getServerSession(authOptions);
+
+Session is obtained ina client side component with:
+
+    import { useSession } from "next-auth/react";
+    const { data: session, status } = useSession();

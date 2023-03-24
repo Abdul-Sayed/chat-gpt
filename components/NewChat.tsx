@@ -10,10 +10,8 @@ function NewChat() {
   const router = useRouter();
   const { data: session } = useSession();
 
+  // Create new entry in chats collection, adding two fields
   const createNewChat = async () => {
-    // users holds a list of user emails
-    // an email maps to many chats
-    // any of the chats hold hashes with the doc id key and the message object value
     const doc = await addDoc(collection(db, "users", session?.user?.email!, "chats"), {
       userId: session?.user?.email!,
       createdAt: serverTimestamp(),

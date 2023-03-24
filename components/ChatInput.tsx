@@ -51,6 +51,7 @@ function ChatInput({ chatId, session, messages }: Props) {
       message
     );
 
+    // Obtain the text of all prior messages in one string
     const promptHistory = (messages?.docs || [])
       .map((message) => message.data().text)
       .reduce((text, messages) => (text += messages), "");

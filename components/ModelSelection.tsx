@@ -5,11 +5,11 @@ import useSWR from "swr";
 import Select from "react-select";
 
 const ModelSelection = () => {
+  // Get all the Chat Engines or models from ChatGPT
   const fetchModels = () => fetch("/api/getModels").then((res) => res.json());
-
-  // Make a fetch call to get all the GPT models
   const { data: models, error, isLoading } = useSWR("models", fetchModels);
-  // Set the model based on the chosen option
+
+  // Assign a default model and set the model based on the selected option
   const { data: model, mutate: setModel } = useSWR("model", {
     fallbackData: "text-davinci-003",
   });

@@ -22,6 +22,7 @@ const ChatRow = ({ id }: Props) => {
     collection(db, "users", session?.user?.email!, "chats", id, "messages")
   );
 
+  // Set the ChatRow as active if its the chat being viewed
   useEffect(() => {
     if (!pathName) return;
     setActive(pathName.includes(id));
