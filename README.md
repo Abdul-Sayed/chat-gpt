@@ -2,6 +2,8 @@
 
 ## Web app using React, NextJS 13 with Server and Client components, Typescript, OpenAI ChatGPT API, Firebase, Firestore, Firebase Admin, NextAuth with Firebase, useSWR, React-Select, React Hot Toast, TailwindCSS
 
+API: `https://api.openai.com/v1/chat/completions`
+
 ### File and Folder structure
 
 The app folder contains the application wide layout, as well as the navigation routes
