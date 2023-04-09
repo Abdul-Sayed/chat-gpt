@@ -2,7 +2,7 @@
 module.exports = {
   reactStrictMode: true,
   images: {
-    domains: ["uploads-ssl.webflow.com"],
+    domains: ["uploads-ssl.webflow.com", "upload.wikimedia.org"],
   },
   experimental: {
     appDir: true,
